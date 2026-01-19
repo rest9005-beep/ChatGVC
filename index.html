@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusChat | Современный мессенджер</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+</head>
+<body>
+    <div id="app" class="light-theme">
+        <!-- Экран авторизации/регистрации -->
+        <div id="auth-screen" class="screen active">
+            <div class="auth-container glass">
+                <div class="auth-header">
+                    <h1 class="logo">
+                        <i class="fas fa-comment-dots"></i> NexusChat
+                    </h1>
+                    <p class="auth-subtitle">Современный мессенджер для общения</p>
+                </div>
+                
+                <form id="auth-form" class="auth-form">
+                    <div class="form-toggle">
+                        <button type="button" class="toggle-btn active" data-mode="login">Вход</button>
+                        <button type="button" class="toggle-btn" data-mode="register">Регистрация</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username">Имя пользователя</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-at"></i>
+                            <input type="text" id="username" name="username" placeholder="@username" required>
+                        </div>
+                        <div id="username-error" class="error-message"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Пароль</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Минимум 6 символов" required minlength="6">
+                        </div>
+                        <div id="password-error" class="error-message"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block" id="auth-submit">
+                        <span class="btn-text">Войти в аккаунт</span>
+                        <i class="fas fa-spinner fa-spin hidden"></i>
+                    </button>
+                    
+                    <div id="auth-message" class="auth-message"></div>
+                </form>
+                
+                <div class="auth-footer">
+                    <p class="demo-info">
+                        <i class="fas fa-info-circle"></i> Для тестирования используйте @user1 / password123 или создайте новый аккаунт
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Основной интерфейс мессенджера -->
+        <div id="main-screen" class="screen">
+            <div class="app-container">
+                <!-- Боковая панель с поиском и списком чатов -->
+                <div class="sidebar">
+                    <!-- Шапка боковой панели с профилем -->
+                    <div class="sidebar-header glass">
+                        <div class="user-profile-preview">
+                            <div class="avatar-small" id="current-user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <h3 id="current-username">@username</h3>
+                                <p class="user-status online">В сети</p>
+                            </div>
+                            <button id="settings-toggle" class="icon-btn" title="Настройки">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Поиск пользователей -->
+                        <div class="search-container">
+                            <div class="input-with-icon">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="user-search" placeholder="Найти пользователя...">
+                            </div>
+                            <div id="search-results" class="search-results glass hidden"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Список чатов -->
+                    <div class="chats-container">
+                        <div class="chats-header">
+                            <h3><i class="fas fa-comments"></i> Чаты</h3>
+                            <span id="chats-count" class="badge">0</span>
+                        </div>
+                        <div id="chats-list" class="chats-list">
+                            <!-- Чаты будут загружены здесь -->
+                            <div class="empty-chats">
+                                <i class="fas fa-comment-slash"></i>
+                                <p>У вас пока нет чатов</p>
+                                <p class="small-text">Начните общение, найдя пользователя через поиск</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Основная область чата -->
+                <div class="main-content">
+                    <!-- Шапка чата с информацией о собеседнике -->
+                    <div id="chat-header" class="chat-header glass hidden">
+                        <div class="chat-partner-info">
+                            <div class="avatar-small" id="chat-partner-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h3 id="chat-partner-name">@username</h3>
+                                <p id="chat-partner-status" class="user-status">был(а) недавно</p>
+                            </div>
+                        </div>
+                        <button id="clear-chat" class="icon-btn text-btn" title="Очистить историю">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Область сообщений -->
+                    <div id="messages-container" class="messages-container">
+                        <div id="messages-list" class="messages-list">
+                            <!-- Сообщения будут загружены здесь -->
+                            <div class="welcome-message">
+                                <div class="welcome-icon">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <h2>Добро пожаловать в NexusChat!</h2>
+                                <p>Выберите чат из списка или начните новый диалог</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Форма отправки сообщения -->
+                        <div id="message-form-container" class="message-form-container glass hidden">
+                            <form id="message-form">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <input type="text" id="message-input" placeholder="Введите сообщение..." autocomplete="off">
+                                    <button type="submit" class="icon-btn send-btn" title="Отправить">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Панель настроек -->
+                <div id="settings-panel" class="settings-panel glass hidden">
+                    <div class="settings-header">
+                        <h3><i class="fas fa-cog"></i> Настройки</h3>
+                        <button id="close-settings" class="icon-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="settings-content">
+                        <!-- Профиль -->
+                        <div class="settings-section">
+                            <h4><i class="fas fa-user"></i> Профиль</h4>
+                            
+                            <div class="profile-banner-preview" id="banner-preview">
+                                <button id="change-banner" class="edit-overlay">
+                                    <i class="fas fa-camera"></i> Сменить баннер
+                                </button>
+                            </div>
+                            
+                            <div class="profile-avatar-section">
+                                <div class="avatar-large" id="avatar-preview">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <button id="change-avatar" class="btn btn-outline">
+                                    <i class="fas fa-camera"></i> Сменить аватар
+                                </button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profile-username">Имя пользователя</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-at"></i>
+                                    <input type="text" id="profile-username" value="@username">
+                                </div>
+                                <div id="profile-username-error" class="error-message"></div>
+                            </div>
+                            
+                            <button id="save-profile" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Сохранить изменения
+                            </button>
+                        </div>
+                        
+                        <!-- Внешний вид -->
+                        <div class="settings-section">
+                            <h4><i class="fas fa-palette"></i> Внешний вид</h4>
+                            
+                            <div class="theme-selector">
+                                <div class="theme-option" data-theme="light">
+                                    <div class="theme-preview light-theme">
+                                        <div class="preview-header"></div>
+                                        <div class="preview-content">
+                                            <div class="preview-message left"></div>
+                                            <div class="preview-message right"></div>
+                                        </div>
+                                    </div>
+                                    <p>Светлая</p>
+                                    <i class="fas fa-check check-icon hidden"></i>
+                                </div>
+                                
+                                <div class="theme-option" data-theme="dark">
+                                    <div class="theme-preview dark-theme">
+                                        <div class="preview-header"></div>
+                                        <div class="preview-content">
+                                            <div class="preview-message left"></div>
+                                            <div class="preview-message right"></div>
+                                        </div>
+                                    </div>
+                                    <p>Тёмная</p>
+                                    <i class="fas fa-check check-icon hidden"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Управление аккаунтом -->
+                        <div class="settings-section">
+                            <h4><i class="fas fa-user-cog"></i> Управление аккаунтом</h4>
+                            
+                            <button id="logout-btn" class="btn btn-danger btn-block">
+                                <i class="fas fa-sign-out-alt"></i> Выйти из аккаунта
+                            </button>
+                            
+                            <div class="settings-info">
+                                <p><i class="fas fa-database"></i> Данные хранятся локально в вашем браузере</p>
+                                <p><i class="fas fa-trash"></i> Очистка данных удалит все чаты и настройки</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Скрытые инпуты для загрузки файлов -->
+        <input type="file" id="avatar-input" accept="image/*" class="hidden">
+        <input type="file" id="banner-input" accept="image/*" class="hidden">
+        
+        <!-- Уведомления -->
+        <div id="notification-container"></div>
+    </div>
+    
+    <script src="app.js" type="module"></script>
+</body>
+</html>
